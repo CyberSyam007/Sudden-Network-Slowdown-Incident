@@ -34,7 +34,7 @@ DeviceProcessEvents
 ```
 
 ### **Timeline Overview**
-1. **🔍 first-test was found failing several connection requests against itself and another host on the same network.**
+1. **🔍 first-test with ip 10.0.0.234 was found failing several connection requests against itself and another host on the same network.**
 
    **Detection Query (KQL):**
    ```kql
@@ -44,44 +44,44 @@ DeviceProcessEvents
    | order by ConnectionCount
    ```
 
-![Screenshot 2025-01-06 104150](https://github.com/user-attachments/assets/2eb708ed-7191-4219-b1a8-7fd416eee0c2)
+![Screenshot 2025-01-06 104150](https://github.com/CyberSyam007/Sudden-Network-Slowdown-Incident/blob/main/Media/Screenshot%202025-04-25%20215915.png)
 
 
-2. **⚙️ Process Analysis:**
+2. **⚙️ Network Analysis:**
    - **Observed Behavior:** After observing failed connection requests from a suspected host (`10.0.0.5`) in chronological order, I noticed a port scan was taking place due to the sequential order of the ports. There were several port scans being conducted.
 
    **Detection Query (KQL):**
    ```kql
-   let IPInQuestion = "10.0.0.5";
+   let IPInQuestion = "10.0.0.234";
    DeviceNetworkEvents
    | where ActionType == "ConnectionFailed"
    | where LocalIP == IPInQuestion
    | order by Timestamp desc
    ```
-![Screenshot 2025-01-06 110119](https://github.com/user-attachments/assets/0a413b76-a739-4779-ac8a-aa3cd4a8ff9e)
+![Screenshot 2025-01-06 110119](https://github.com/CyberSyam007/Sudden-Network-Slowdown-Incident/blob/main/Media/2.png)
 
    
 
-3. **🌐 Network Check:**
+3. **🌐 Process Check:**
    - **Observed Behavior:** I pivoted to the `DeviceProcessEvents` table to see if we could see anything that was suspicious around the time the port scan started. We noticed a PowerShell script named `portscan.ps1` launched at `2025-01-06T06:37:00.774381Z`.
 
    **Detection Query (KQL):**
 ```kql
-let VMName = "windows-target-1";
-let specificTime = datetime(2025-01-06T06:37:00.774381Z);
+let VMName = "first-test";
+let specificTime = datetime(2025-03-29T22:57:10.8415673Z);
 DeviceProcessEvents
 | where Timestamp between ((specificTime - 10m) .. (specificTime + 10m))
 | where DeviceName == VMName
 | order by Timestamp desc
 | project Timestamp, FileName, InitiatingProcessCommandLine
 ```
-![Screenshot 2025-01-13 161326](https://github.com/user-attachments/assets/ad26dcfb-2c43-4674-8a14-f926415d9ee6)
+![Screenshot 2025-01-13 161326](https://github.com/CyberSyam007/Sudden-Network-Slowdown-Incident/blob/main/Media/3.png)
 
 5. **📝 Response:**
    - We observed the port scan script was launched by the SYSTEM account. This is not expected behavior and it is not something that was setup by the admins. I isolated the device and ran a malware scan. The malware scan produced no results, so out of caution, I kept the device isolated and put in a ticket to have it re-image/rebuilt. Shared findings with the manager, highlighting automated archive creation. Awaiting further instructions.
  
 
-![Screenshot 2025-01-06 112548](https://github.com/user-attachments/assets/545363b9-cf69-4609-b40a-1af34c18c86e)
+![Screenshot 2025-01-06 112548] (https://github.com/user-attachments/assets/24954b97-9471-46d3-8ea5-5dc693555830)
 
 
 ---
