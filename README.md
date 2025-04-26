@@ -111,7 +111,7 @@ DeviceProcessEvents
 
 ## Created By:
 - **Author Name**: Syam Prakash Maddineni
-- **Author Contact**: https://www.linkedin.com/in/trevinoparker/
+- **Author Contact**: https://www.linkedin.com/in/syam-prakash-maddineni/
 - **Date**: Mar 2025
 
 ## Validated By:
